@@ -11,6 +11,7 @@ services:
   #   restart: "unless-stopped"
   #   networks:
   #     - backend
+
   service1:
     build:
       context: ./
@@ -20,7 +21,6 @@ services:
       - "3001:3000"
       - "9229:9229"
     environment:
-      NODE_ENV: dev
       PARSER: "PARSER_A"
       SERVICE_ID: "service1"
       SECRET: "service1Secret_!"
@@ -28,6 +28,8 @@ services:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
     restart: "unless-stopped"
+    depends_on:
+      - kafka
     networks:
       - backend
 
@@ -40,14 +42,36 @@ services:
       - "3002:3000"
       - "9222:9229"
     environment:
-      NODE_ENV: dev
       PARSER: "PARSER_B"
       SERVICE_ID: "service2"
-      SECRET: "service2Secret_!"
+      SECRET: "service2Secret_@"
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
     restart: "unless-stopped"
+    depends_on:
+      - kafka
+    networks:
+      - backend
+
+  service3:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: service3
+    ports:
+      - "3003:3000"
+      - "9223:9229"
+    environment:
+      PARSER: "PARSER_C"
+      SERVICE_ID: "service3"
+      SECRET: "service3Secret_#"
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: "unless-stopped"
+    depends_on:
+      - kafka
     networks:
       - backend
 
@@ -65,8 +89,10 @@ services:
     ports:
       - "9092:9092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
+      KAFKA_ADVERTISED_HOST_NAME: host.docker.internal
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSET_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "MessageTopic:1:1"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

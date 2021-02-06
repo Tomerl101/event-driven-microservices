@@ -1,12 +1,12 @@
 import { Message } from '../../interfaces/messages.interface';
 import { IParser } from '../parser.interface';
 
-class ParserB implements IParser {
+class ParserC implements IParser {
   public doParse(message: Message): string {
     // Some fancy parser logic
-    console.log("ParserB: start parserB logic...'");
-    return `@@@--- ${message.message} ---@@@`;
+    console.log("ParserC: start parserC logic...'");
+    return `###=== ${message.message} ===###`;
   }
 }
 
-export default ParserB;
+export default ParserC;

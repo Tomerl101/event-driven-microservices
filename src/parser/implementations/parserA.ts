@@ -1,10 +1,11 @@
+import { Message } from '../../interfaces/messages.interface';
 import { IParser } from '../parser.interface';
 
 class ParserA implements IParser {
-  public doParse() {
+  public doParse(message: Message): string {
     // Some fancy parser logic
     console.log("ParserA: start parserA logic...'");
-    return 'parserA logic...';
+    return `!!!~~~ ${message.message} ~~~!!!`;
   }
 }
 
