@@ -1,4 +1,5 @@
 import { Consumer, Kafka, Producer } from 'kafkajs';
+import HttpError from '../errors/httpError';
 import { Message } from '../interfaces/messages.interface';
 
 class KafkaClient {
@@ -12,44 +13,58 @@ class KafkaClient {
 
   // Lazy loading producer connection
   public static async produce(msg: Message) {
-    if (!this.producer) {
-      console.log('creating producer....');
-      this.producer = this.kafka.producer();
-      await this.producer.connect();
-      console.log('Producer Connected!');
-    }
+    try {
+      if (!this.producer) {
+        console.log('Creating Kafka producer....');
+        this.producer = this.kafka.producer();
+        await this.producer.connect();
+        console.log('Producer connected successfully!');
+      }
 
-    const result = await this.producer.send({
-      topic: 'MessageTopic',
-      messages: [
-        {
-          value: JSON.stringify(msg),
-          partition: 0,
-        },
-      ],
-    });
-    console.log(`Send Successfully! ${JSON.stringify(result)}`);
+      console.log(`Producer start sending msg: ${msg}`);
+      const result = await this.producer.send({
+        topic: 'MessageTopic',
+        messages: [
+          {
+            value: JSON.stringify(msg),
+            partition: 0,
+          },
+        ],
+      });
+      console.log(`Producer Send Msg Successfully! ${JSON.stringify(result)}`);
+    } catch (error) {
+      console.log('Producer Failed to send message with error: ', error);
+      throw new HttpError(500, 'Server Internal Error');
+    }
   }
 
   public static async consume(job: any) {
-    if (!this.consumer) {
-      const groupId = process.env.SERVICE_ID || Math.random().toString(36).substring(7);
-      this.consumer = this.kafka.consumer({ groupId });
-      await this.consumer.connect();
-      console.log(`Consumer ${groupId} Connected!`);
+    try {
+      if (!this.consumer) {
+        const groupId = process.env.SERVICE_ID || Math.random().toString(36).substring(7);
+        console.log(`Consumer ${groupId} Trying to Connect Kafka...`);
+        this.consumer = this.kafka.consumer({ groupId });
+        await this.consumer.connect();
+        console.log(`Consumer ${groupId} connected successfully!`);
 
-      await this.consumer.subscribe({
-        topic: 'MessageTopic',
-        fromBeginning: true,
+        await this.consumer.subscribe({
+          topic: 'MessageTopic',
+          fromBeginning: false,
+        });
+      }
+
+      await this.consumer.run({
+        eachMessage: async (eventData) => {
+          console.log(
+            `Recived new Msg ${eventData.message.value?.toString()} on partition ${eventData.partition}`
+          );
+          job(eventData);
+        },
       });
+    } catch (error) {
+      console.log('Consumer Failed to handle message with error: ', error);
+      // Handle error however you like
     }
-
-    await this.consumer.run({
-      eachMessage: async (eventData) => {
-        job(eventData);
-        console.log(`RVD Msg ${eventData.message.value?.toString()} on partition ${eventData.partition}`);
-      },
-    });
   }
 }
 

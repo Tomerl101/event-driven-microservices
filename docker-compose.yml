@@ -1,17 +1,6 @@
 version: "3.7"
 
 services:
-  # proxy:
-  #   image: nginx:alpine
-  #   container_name: proxy
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
-  #   restart: "unless-stopped"
-  #   networks:
-  #     - backend
-
   service1:
     build:
       context: ./
@@ -23,7 +12,6 @@ services:
     environment:
       PARSER: "PARSER_A"
       SERVICE_ID: "service1"
-      SECRET: "service1Secret_!"
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
@@ -44,7 +32,6 @@ services:
     environment:
       PARSER: "PARSER_B"
       SERVICE_ID: "service2"
-      SECRET: "service2Secret_@"
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
@@ -65,7 +52,6 @@ services:
     environment:
       PARSER: "PARSER_C"
       SERVICE_ID: "service3"
-      SECRET: "service3Secret_#"
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules

@@ -13,7 +13,6 @@ class MessageService implements IMessageService {
   private parser = ParserFactory.getParser(process.env.PARSER as ParserTypes);
 
   constructor() {
-    console.log(`${process.env.SERVICE_ID} create parser of type ${process.env.PARSER}`);
     KafkaClient.consume(this.handleMessage); // Subscribe to kafka topic and isten to new events
   }
 
@@ -30,6 +29,7 @@ class MessageService implements IMessageService {
     if (isEmpty(messageDto)) throw new HttpError(400, 'Invalid message body');
 
     const message: Message = { id: uuidv4(), message: messageDto.message };
+    // Broadcast message to all other services
     KafkaClient.produce(message);
     return message;
   }
@@ -41,7 +41,7 @@ class MessageService implements IMessageService {
       console.log('Start handle message: ', message);
       message.parsed = this.parser.doParse(message);
       this.messages.push(message);
-    }, 3000);
+    }, 1500);
 }
 
 export default MessageService;

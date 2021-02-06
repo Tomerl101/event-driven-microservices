@@ -6,10 +6,11 @@ import validate from '../middlewares/validate.middleware';
 
 class MessageRouters implements IRoute {
   public router = Router();
-  public messageController = new MessageController();
+  public messageController: MessageController;
   readonly baseUrl: string;
 
-  constructor() {
+  constructor(messageController: MessageController) {
+    this.messageController = messageController;
     this.baseUrl = '/api/resource';
     this.initializeRoutes();
   }
@@ -18,7 +19,7 @@ class MessageRouters implements IRoute {
     this.router.get(`${this.baseUrl}/:id`, this.messageController.getMessage);
     this.router.post(
       `${this.baseUrl}`,
-      validate(CreateMessageDto, 'body', true),
+      validate(CreateMessageDto, 'body', false),
       this.messageController.createMessage
     );
   }

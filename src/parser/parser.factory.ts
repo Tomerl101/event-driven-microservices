@@ -13,7 +13,8 @@ class ParserFactory {
     } else if (ParserTypes.PARSER_C === type) {
       return new ParserC();
     }
-    throw new Error('Cannot create parser');
+    throw new Error('Failed to create parser...');
+    // process.exit(1);
   }
 }
 

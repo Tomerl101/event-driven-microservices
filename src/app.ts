@@ -8,7 +8,8 @@ const debug = Debug(`${process.env.SERVICE_ID}`);
 import MessageRoutes from './routes/messages.routes';
 import IRoute from './routes/routes.interface';
 import errorMiddleware from './middlewares/error.middleware';
-
+import MessagesController from './controllers/messages.controller';
+import MessageService from './services/messages.service';
 class App {
   public app: express.Application;
   public port: string | number;
@@ -18,11 +19,11 @@ class App {
   constructor() {
     this.app = express();
     this.port = process.env.PORT || 3000;
-    this.env = process.env.NODE_ENV || 'development';
+    this.env = process.env.NODE_ENV || 'dev';
     this.serviceId = process.env.SERVICE_ID || 'randomServiceId';
 
     this.initializeMiddlewares();
-    this.initializeRoutes([new MessageRoutes()]);
+    this.initializeRoutes([new MessageRoutes(new MessagesController(new MessageService()))]); // TODO: better DI..
     this.initializeErrorHandling(); // Need to be last, initialize after all routes
   }
 
@@ -38,7 +39,7 @@ class App {
   }
 
   private initializeMiddlewares() {
-    console.log('init middlewares');
+    console.log('Initialize middlewares');
     this.app.use(morgan('dev'));
     this.app.use(cors({ origin: true, credentials: true }));
     this.app.use(helmet());

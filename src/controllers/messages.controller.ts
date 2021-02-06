@@ -2,11 +2,14 @@ import { NextFunction, Request, Response } from 'express';
 import { CreateMessageDto } from '../dtos/createMessages.dto';
 import { IMessageController } from './controllers.interface';
 import { Message } from '../interfaces/messages.interface';
-import messageService from '../services/messages.service';
+import MessageService from '../services/messages.service';
 
 class MessagesController implements IMessageController {
-  public messageService = new messageService();
+  public messageService: MessageService;
 
+  constructor(messageService: MessageService) {
+    this.messageService = messageService;
+  }
   public getMessage = (req: Request, res: Response, next: NextFunction): void => {
     try {
       const messageId = req.params.id;
