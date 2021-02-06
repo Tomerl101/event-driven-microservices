@@ -14,7 +14,7 @@ class MessagesController implements IMessageController {
       res.status(200).json({
         id: message.id,
         message: message.message,
-        parsed: 'some parsed message',
+        parsed: message.parsed,
         serviceId: process.env.SERVICE_ID,
       });
     } catch (error) {
